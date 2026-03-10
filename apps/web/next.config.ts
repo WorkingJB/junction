@@ -8,8 +8,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  // Enable standalone output for Docker and better performance
-  output: 'standalone',
   // Optimize for production
   poweredByHeader: false,
   // Enable React strict mode
