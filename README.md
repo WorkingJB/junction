@@ -36,13 +36,19 @@ Junction is an open-source task and agent management platform that provides a si
 
 ## Quick Start
 
-### Prerequisites
+### 🚀 Deploy to Cloud (Recommended for Testing)
+
+Want to test Junction in the cloud right away? Follow our **[Quick Deploy Guide](./QUICKSTART_DEPLOY.md)** to get up and running on Vercel + Supabase in ~10 minutes.
+
+### 💻 Local Development
+
+#### Prerequisites
 
 - **Node.js** 18+ and **pnpm** 8+
 - **Docker** and **Docker Compose** (for local database)
 - **Supabase** account (or use local Supabase)
 
-### Installation
+#### Installation
 
 1. Clone the repository:
 ```bash
