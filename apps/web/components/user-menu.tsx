@@ -21,7 +21,7 @@ export function UserMenu() {
           .from('users')
           .select('first_name, last_name')
           .eq('id', user.id)
-          .single();
+          .single<{ first_name: string | null; last_name: string | null }>();
 
         if (profile?.first_name && profile?.last_name) {
           setDisplayName(`${profile.first_name} ${profile.last_name}`);
