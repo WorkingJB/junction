@@ -1,0 +1,55 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+
+# Next.js
+.next
+out
+dist
+build
+
+# Production
+*.log*
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+*.log
+
+# Local env files
+.env
+.env*.local
+.env.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Supabase
+.supabase
+
+# Editor
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Docs
+docs
+README.md

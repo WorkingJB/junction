@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    container_name: junction-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: junction
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Supabase local (optional - for full Supabase stack)
+  # Uncomment if you want to run the full Supabase stack locally
+  # supabase:
+  #   image: supabase/postgres:15.1.0.147
+  #   container_name: junction-supabase
+  #   environment:
+  #     POSTGRES_PASSWORD: postgres
+  #   ports:
+  #     - "54322:5432"
+  #   volumes:
+  #     - supabase_data:/var/lib/postgresql/data
+  #     - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
+
+  # Next.js web application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: junction-web
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://localhost:54321}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/junction
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      db:
+        condition: service_healthy
+    command: pnpm dev
+
+  # MCP Server (optional - for testing MCP integration)
+  # mcp-server:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.mcp
+  #   container_name: junction-mcp-server
+  #   environment:
+  #     - NODE_ENV=development
+  #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/junction
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+
+volumes:
+  postgres_data:
+    driver: local
+  # supabase_data:
+  #   driver: local
