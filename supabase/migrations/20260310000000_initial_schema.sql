@@ -1,8 +1,7 @@
 -- Junction Initial Schema Migration
 -- Creates all tables for task management and agent tracking
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Note: gen_random_uuid() is built-in to Postgres 13+, no extension needed
 
 -- Create custom types
 CREATE TYPE task_status AS ENUM ('todo', 'in_progress', 'completed', 'cancelled');
@@ -29,7 +28,7 @@ CREATE TABLE public.users (
 -- TASKS TABLE (Human tasks)
 -- ============================================================================
 CREATE TABLE public.tasks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL CHECK (char_length(title) <= 500),
   description TEXT,
@@ -49,7 +48,7 @@ CREATE TABLE public.tasks (
 -- AGENTS TABLE
 -- ============================================================================
 CREATE TABLE public.agents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL CHECK (char_length(name) <= 200),
   type TEXT NOT NULL,
@@ -65,7 +64,7 @@ CREATE TABLE public.agents (
 -- AGENT_TASKS TABLE
 -- ============================================================================
 CREATE TABLE public.agent_tasks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_id UUID NOT NULL REFERENCES public.agents(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL CHECK (char_length(title) <= 500),
@@ -84,7 +83,7 @@ CREATE TABLE public.agent_tasks (
 -- AGENT_COSTS TABLE
 -- ============================================================================
 CREATE TABLE public.agent_costs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_id UUID NOT NULL REFERENCES public.agents(id) ON DELETE CASCADE,
   agent_task_id UUID REFERENCES public.agent_tasks(id) ON DELETE SET NULL,
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -100,7 +99,7 @@ CREATE TABLE public.agent_costs (
 -- TASK_INTEGRATIONS TABLE
 -- ============================================================================
 CREATE TABLE public.task_integrations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   provider integration_provider NOT NULL,
   access_token TEXT NOT NULL,
@@ -118,7 +117,7 @@ CREATE TABLE public.task_integrations (
 -- AUDIT_LOGS TABLE
 -- ============================================================================
 CREATE TABLE public.audit_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   agent_id UUID REFERENCES public.agents(id) ON DELETE SET NULL,
   action TEXT NOT NULL,
