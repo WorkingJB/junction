@@ -36,9 +36,15 @@ Junction is an open-source task and agent management platform that provides a si
 
 ## Quick Start
 
+### 🌐 Try the Live Demo
+
+**Live Demo**: https://junction-web-seven.vercel.app
+
+Test Junction right now! Sign up and explore the interface. Phase 1 (Foundation) is complete with authentication and basic dashboard.
+
 ### 🚀 Deploy to Cloud (Recommended for Testing)
 
-Want to test Junction in the cloud right away? Follow our **[Quick Deploy Guide](./QUICKSTART_DEPLOY.md)** to get up and running on Vercel + Supabase in ~10 minutes.
+Want your own instance in the cloud? Follow our **[Quick Deploy Guide](./QUICKSTART_DEPLOY.md)** to get up and running on Vercel + Supabase in ~10 minutes.
 
 ### 💻 Local Development
 
@@ -218,7 +224,10 @@ docker compose down
 
 ## Documentation
 
+- [Progress Tracking](./docs/PROGRESS.md) - Current status and completed phases
 - [Implementation Plan](./docs/IMPLEMENTATION_PLAN.md) - Detailed roadmap and architecture
+- [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) - How to deploy to Vercel + Supabase
+- [Parity Documentation](./docs/HOSTED_SELFHOSTED_PARITY.md) - Maintaining hosted/self-hosted parity
 - [Agent Integration Guide](./docs/AGENT_INTEGRATION_GUIDE.md) - How to integrate your agents (coming soon)
 - [API Reference](./docs/API_REFERENCE.md) - REST API documentation (coming soon)
 - [Self-Hosting Guide](./docs/SELF_HOSTING.md) - Deploy Junction yourself (coming soon)
@@ -226,13 +235,33 @@ docker compose down
 
 ## Roadmap
 
-### MVP (Current - Week 10)
-- ✅ Phase 1: Foundation (project setup, database, auth)
-- → Phase 2: Human task management + Todoist integration
-- → Phase 3: Agent integration (MCP + REST + webhooks)
-- → Phase 4: Unified dashboard
-- → Phase 5: Auditing & security
-- → Phase 6: Deployment & documentation
+### MVP (Current Progress)
+- ✅ **Phase 1: Foundation** - COMPLETE (March 2026)
+  - Project setup with Next.js 15 + TypeScript
+  - Database schema (7 tables) with Supabase
+  - Authentication (signup, login, protected routes)
+  - Deployed to Vercel + Supabase
+  - Docker Compose for self-hosting
+- 🚀 **Phase 2: Human Task Management** - NEXT
+  - Task CRUD operations
+  - Task list UI with filtering
+  - Dashboard metrics integration
+  - (Optional) Todoist integration
+- → **Phase 3: Agent Integration** - Planned
+  - MCP server for agent communication
+  - REST API for any agent
+  - Agent task tracking UI
+  - Cost monitoring
+- → **Phase 4: Unified Dashboard** - Planned
+  - Combined human + agent task view
+  - Manager/team view
+- → **Phase 5: Auditing & Security** - Planned
+  - Audit log viewer
+  - Security enhancements
+- → **Phase 6: Polish & Documentation** - Planned
+  - Final deployment
+  - Comprehensive docs
+  - Example integrations
 
 ### Post-MVP
 - Additional integrations (Microsoft To Do, Linear, Asana, Jira)
