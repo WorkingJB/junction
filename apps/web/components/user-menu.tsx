@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export function UserMenu() {
-  const [email, setEmail] = useState<string>('');
+  const [displayName, setDisplayName] = useState<string>('');
   const router = useRouter();
   const supabase = createClient();
 
@@ -14,8 +14,22 @@ export function UserMenu() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (user) {
-        setEmail(user.email || '');
+        // Fetch user profile to get first and last name
+        const { data: profile } = await supabase
+          .from('users')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.first_name && profile?.last_name) {
+          setDisplayName(`${profile.first_name} ${profile.last_name}`);
+        } else if (profile?.first_name) {
+          setDisplayName(profile.first_name);
+        } else {
+          setDisplayName(user.email || '');
+        }
       }
     }
     getUser();
@@ -28,7 +42,7 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-4">
-      <span className="text-sm text-muted-foreground">{email}</span>
+      <span className="text-sm text-muted-foreground">{displayName}</span>
       <button
         onClick={handleSignOut}
         className="text-sm text-muted-foreground hover:text-foreground"
