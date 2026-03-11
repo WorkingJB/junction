@@ -5,27 +5,44 @@ import Link from 'next/link';
 import type { Database } from '@junction/database';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
+type Agent = Database['public']['Tables']['agents']['Row'];
+type AgentTask = Database['public']['Tables']['agent_tasks']['Row'];
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentTasks, setAgentTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/tasks');
-        if (response.ok) {
-          const data = await response.json();
+        const [tasksRes, agentsRes, agentTasksRes] = await Promise.all([
+          fetch('/api/tasks'),
+          fetch('/api/agents'),
+          fetch('/api/agent-tasks'),
+        ]);
+
+        if (tasksRes.ok) {
+          const data = await tasksRes.json();
           setTasks(data.tasks || []);
         }
+        if (agentsRes.ok) {
+          const data = await agentsRes.json();
+          setAgents(data.agents || []);
+        }
+        if (agentTasksRes.ok) {
+          const data = await agentTasksRes.json();
+          setAgentTasks(data.tasks || []);
+        }
       } catch (error) {
-        console.error('Failed to fetch tasks:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
+    fetchData();
   }, []);
 
   const taskCounts = {
@@ -33,6 +50,18 @@ export default function DashboardPage() {
     todo: tasks.filter((t) => t.status === 'todo').length,
     in_progress: tasks.filter((t) => t.status === 'in_progress').length,
     completed: tasks.filter((t) => t.status === 'completed').length,
+  };
+
+  const agentCounts = {
+    total: agents.length,
+    active: agents.filter((a) => a.status === 'active').length,
+    idle: agents.filter((a) => a.status === 'idle').length,
+  };
+
+  const agentTaskCounts = {
+    total: agentTasks.length,
+    in_progress: agentTasks.filter((t) => t.status === 'in_progress').length,
+    waiting: agentTasks.filter((t) => t.status === 'waiting_for_input').length,
   };
 
   const recentTasks = tasks.slice(0, 5);
@@ -60,21 +89,31 @@ export default function DashboardPage() {
           </p>
         </Link>
 
-        <div className="rounded-lg border bg-card p-6">
+        <Link
+          href="/dashboard/agents"
+          className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent/50"
+        >
           <h3 className="font-semibold">Agent Tasks</h3>
-          <p className="mt-2 text-2xl font-bold">0</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tasks being worked on by agents
+          <p className="mt-2 text-2xl font-bold">
+            {loading ? '...' : agentTaskCounts.total}
           </p>
-        </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {agentTaskCounts.in_progress} in progress, {agentTaskCounts.waiting} waiting
+          </p>
+        </Link>
 
-        <div className="rounded-lg border bg-card p-6">
+        <Link
+          href="/dashboard/agents"
+          className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent/50"
+        >
           <h3 className="font-semibold">Active Agents</h3>
-          <p className="mt-2 text-2xl font-bold">0</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Agents currently online
+          <p className="mt-2 text-2xl font-bold">
+            {loading ? '...' : agentCounts.active}
           </p>
-        </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {agentCounts.total} total, {agentCounts.idle} idle
+          </p>
+        </Link>
       </div>
 
       {!loading && recentTasks.length > 0 && (
@@ -114,7 +153,8 @@ export default function DashboardPage() {
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li>✓ Phase 1: Foundation - Complete!</li>
           <li>✓ Phase 2: Task Management - Complete!</li>
-          <li>→ Next: Add agent integration layer (Phase 3)</li>
+          <li>✓ Phase 3: Agent Integration - In Progress!</li>
+          <li>→ Next: Build MCP server for Claude Code integration</li>
         </ul>
       </div>
     </div>

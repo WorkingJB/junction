@@ -28,6 +28,12 @@ export default function DashboardLayout({
                 >
                   Tasks
                 </Link>
+                <Link
+                  href="/dashboard/agents"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                >
+                  Agents
+                </Link>
               </div>
             </div>
             <UserMenu />
