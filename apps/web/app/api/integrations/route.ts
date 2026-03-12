@@ -1,0 +1,67 @@
+/**
+ * API route for managing integrations
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+/**
+ * GET /api/integrations
+ * List all integrations for the current user
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Fetch user's integrations
+    const { data: integrations, error } = await supabase
+      .from('task_integrations')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch integrations:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch integrations' },
+        { status: 500 }
+      );
+    }
+
+    // Map to a safe response format (don't expose tokens)
+    const safeIntegrations = integrations.map((integration) => ({
+      id: integration.id,
+      provider: integration.provider,
+      syncEnabled: integration.sync_enabled,
+      lastSync: integration.last_sync,
+      syncErrors: integration.sync_errors || 0,
+      lastError: integration.last_error,
+      lastErrorAt: integration.last_error_at,
+      webhookId: integration.webhook_id,
+      requiresPolling: integration.requires_polling || false,
+      pollingIntervalMinutes: integration.polling_interval_minutes,
+      createdAt: integration.created_at,
+      updatedAt: integration.updated_at,
+    }));
+
+    return NextResponse.json({
+      integrations: safeIntegrations,
+    });
+  } catch (error) {
+    console.error('Error fetching integrations:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

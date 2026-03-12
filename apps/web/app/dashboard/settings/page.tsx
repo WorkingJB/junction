@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Database } from '@junction/database';
+import { IntegrationsTab } from './IntegrationsTab';
 
 type UserSettings = Database['public']['Tables']['user_settings']['Row'];
 
@@ -9,6 +10,7 @@ const tabs = [
   { id: 'appearance', name: 'Appearance' },
   { id: 'tasks', name: 'Tasks' },
   { id: 'agents', name: 'Agents' },
+  { id: 'integrations', name: 'Integrations' },
   { id: 'profile', name: 'Profile' },
 ];
 
@@ -353,6 +355,9 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Integrations Tab */}
+        {activeTab === 'integrations' && <IntegrationsTab />}
 
         {/* Profile Tab */}
         {activeTab === 'profile' && (

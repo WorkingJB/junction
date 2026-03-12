@@ -269,40 +269,67 @@ export type Database = {
           access_token: string
           created_at: string
           id: string
+          last_error: string | null
+          last_error_at: string | null
+          last_poll_at: string | null
           last_sync: string | null
           metadata: Json | null
+          polling_interval_minutes: number | null
           provider: Database["public"]["Enums"]["integration_provider"]
           refresh_token: string | null
+          requires_polling: boolean | null
           sync_enabled: boolean
+          sync_errors: number | null
           token_expires_at: string | null
           updated_at: string
           user_id: string
+          webhook_id: string | null
+          webhook_secret: string | null
+          webhook_url: string | null
         }
         Insert: {
           access_token: string
           created_at?: string
           id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_poll_at?: string | null
           last_sync?: string | null
           metadata?: Json | null
+          polling_interval_minutes?: number | null
           provider: Database["public"]["Enums"]["integration_provider"]
           refresh_token?: string | null
+          requires_polling?: boolean | null
           sync_enabled?: boolean
+          sync_errors?: number | null
           token_expires_at?: string | null
           updated_at?: string
           user_id: string
+          webhook_id?: string | null
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Update: {
           access_token?: string
           created_at?: string
           id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_poll_at?: string | null
           last_sync?: string | null
           metadata?: Json | null
+          polling_interval_minutes?: number | null
           provider?: Database["public"]["Enums"]["integration_provider"]
           refresh_token?: string | null
+          requires_polling?: boolean | null
           sync_enabled?: boolean
+          sync_errors?: number | null
           token_expires_at?: string | null
           updated_at?: string
           user_id?: string
+          webhook_id?: string | null
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Relationships: [
           {
@@ -487,6 +514,13 @@ export type Database = {
         | "asana"
         | "linear"
         | "jira"
+        | "clickup"
+        | "monday"
+        | "google_tasks"
+        | "microsoft_planner"
+        | "basecamp"
+        | "ticktick"
+        | "microsoft_project"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_status: "todo" | "in_progress" | "completed" | "cancelled"
       task_type: "work" | "personal"
@@ -1074,6 +1108,13 @@ export const Constants = {
         "asana",
         "linear",
         "jira",
+        "clickup",
+        "monday",
+        "google_tasks",
+        "microsoft_planner",
+        "basecamp",
+        "ticktick",
+        "microsoft_project",
       ],
       task_priority: ["low", "medium", "high", "urgent"],
       task_status: ["todo", "in_progress", "completed", "cancelled"],
