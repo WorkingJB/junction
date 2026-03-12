@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 import TaskList from '@/components/tasks/task-list';
 import TaskForm from '@/components/tasks/task-form';
 

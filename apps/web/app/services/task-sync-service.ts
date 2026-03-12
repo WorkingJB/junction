@@ -12,7 +12,7 @@ import type {
 } from '@junction/integrations';
 import { detectTaskChanges, validateTask, ConflictResolution } from '@junction/integrations';
 import { createClient } from '@/lib/supabase/server';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 

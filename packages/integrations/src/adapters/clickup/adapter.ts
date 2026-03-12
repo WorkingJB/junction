@@ -28,10 +28,10 @@ import type {
   ClickUpTeam,
   ClickUpWebhook,
   ClickUpWebhookPayload,
-  ClickUpWebhookEvent,
   ClickUpTasksResponse,
   CreateWebhookRequest,
 } from './types';
+import { ClickUpWebhookEvent } from './types';
 import {
   mapClickUpTaskToIntegrated,
   mapIntegratedTaskToClickUpCreate,

@@ -104,7 +104,7 @@ export function mapIntegratedTaskToAsanaUpdate(
   }
 
   if (task.status) {
-    request.completed = task.status === 'done';
+    request.completed = task.status === 'completed';
   }
 
   if (task.metadata?.assignee && typeof task.metadata.assignee === 'object') {
@@ -129,5 +129,5 @@ export function mapIntegratedTaskToAsanaUpdate(
  * Asana only has completed/not completed
  */
 function mapAsanaStatus(completed: boolean): TaskStatus {
-  return completed ? 'done' : 'todo';
+  return completed ? 'completed' : 'todo';
 }

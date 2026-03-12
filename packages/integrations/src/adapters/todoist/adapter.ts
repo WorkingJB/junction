@@ -151,7 +151,7 @@ export class TodoistAdapter extends BaseIntegrationAdapter {
     });
 
     // Handle status changes (complete/uncomplete)
-    if (task.status === 'done') {
+    if (task.status === 'completed') {
       await client.post(`/tasks/${task.externalId}/close`);
       updatedTask.is_completed = true;
     } else if (task.status === 'todo') {

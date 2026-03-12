@@ -72,7 +72,7 @@ export const StatusMapping = {
       return 'in_progress';
     }
     if (['done', 'completed', 'finished', 'closed', 'resolved'].includes(normalized)) {
-      return 'done';
+      return 'completed';
     }
     if (['cancelled', 'canceled', 'archived'].includes(normalized)) {
       return 'cancelled';
@@ -89,7 +89,7 @@ export const StatusMapping = {
       const map: Record<TaskStatus, string> = {
         todo: 'todo',
         in_progress: 'inProgress',
-        done: 'done',
+        completed: 'completed',
         cancelled: 'cancelled',
       };
       return map[status];
@@ -99,7 +99,7 @@ export const StatusMapping = {
       const map: Record<TaskStatus, string> = {
         todo: 'To Do',
         in_progress: 'In Progress',
-        done: 'Done',
+        completed: 'Completed',
         cancelled: 'Cancelled',
       };
       return map[status];

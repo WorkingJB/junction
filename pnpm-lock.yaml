@@ -26,12 +26,12 @@ importers:
 
   apps/web:
     dependencies:
-      '@junction/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@junction/integrations':
         specifier: workspace:*
         version: link:../../packages/integrations
+      '@orqestr/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@supabase/ssr':
         specifier: ^0.6.0
         version: 0.6.1(@supabase/supabase-js@2.99.0)
@@ -125,7 +125,7 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@junction/database':
+      '@orqestr/database':
         specifier: workspace:*
         version: link:../database
       axios:

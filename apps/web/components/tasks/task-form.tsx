@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 

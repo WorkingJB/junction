@@ -171,7 +171,7 @@ export async function processWebhook(
     // Process the webhook with the adapter
     const webhookPayload: WebhookPayload = {
       provider,
-      signature,
+      signature: signature || undefined,
       timestamp,
       eventType: extractEventType(provider, payload),
       data: payload as Record<string, unknown>,

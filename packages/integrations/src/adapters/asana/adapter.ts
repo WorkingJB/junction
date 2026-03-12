@@ -30,11 +30,11 @@ import type {
   AsanaUser,
   AsanaWebhook,
   AsanaWebhookPayload,
-  AsanaWebhookAction,
   AsanaResponse,
   AsanaListResponse,
   CreateWebhookRequest,
 } from './types';
+import { AsanaWebhookAction } from './types';
 import {
   mapAsanaTaskToIntegrated,
   mapIntegratedTaskToAsanaCreate,

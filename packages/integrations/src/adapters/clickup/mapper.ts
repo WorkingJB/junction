@@ -127,7 +127,7 @@ function mapClickUpStatus(statusName: string, statusType: string): TaskStatus {
 
   // Check status type first (closed, custom, open)
   if (statusType === 'closed') {
-    return 'done';
+    return 'completed';
   }
 
   // Then check common status names
@@ -138,7 +138,7 @@ function mapClickUpStatus(statusName: string, statusType: string): TaskStatus {
     return 'in_progress';
   }
   if (['complete', 'completed', 'done', 'closed'].includes(normalized)) {
-    return 'done';
+    return 'completed';
   }
   if (['cancelled', 'canceled'].includes(normalized)) {
     return 'cancelled';

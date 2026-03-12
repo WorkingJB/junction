@@ -11,8 +11,8 @@ import type {
   WebhookPayload,
   RateLimitInfo,
   TaskConflict,
-  ConflictResolution,
 } from '../../types/common';
+import { ConflictResolution } from '../../types/common';
 
 /**
  * Base interface that all integration adapters must implement

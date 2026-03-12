@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 
 type AgentUpdate = Database['public']['Tables']['agents']['Update'];
 

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 
 type UserSettings = Database['public']['Tables']['user_settings']['Row'];
 type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update'];

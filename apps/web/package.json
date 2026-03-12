@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@junction/database": "workspace:*",
+    "@orqestr/database": "workspace:*",
     "@junction/integrations": "workspace:*",
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.50.0",

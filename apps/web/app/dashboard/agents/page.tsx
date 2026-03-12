@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 import Link from 'next/link';
 
 type Agent = Database['public']['Tables']['agents']['Row'];

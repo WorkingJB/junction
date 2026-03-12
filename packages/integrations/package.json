@@ -8,7 +8,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@junction/database": "workspace:*",
+    "@orqestr/database": "workspace:*",
     "axios": "^1.7.2",
     "zod": "^3.24.1"
   },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 import { IntegrationsTab } from './IntegrationsTab';
 
 type UserSettings = Database['public']['Tables']['user_settings']['Row'];

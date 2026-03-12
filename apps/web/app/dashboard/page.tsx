@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 type Agent = Database['public']['Tables']['agents']['Row'];

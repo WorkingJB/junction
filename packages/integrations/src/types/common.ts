@@ -3,7 +3,7 @@
  * These types provide a standardized interface between external providers and Orqestr
  */
 
-import type { Database } from '@junction/database';
+import type { Database } from '@orqestr/database';
 
 export type IntegrationProvider = Database['public']['Enums']['integration_provider'];
 

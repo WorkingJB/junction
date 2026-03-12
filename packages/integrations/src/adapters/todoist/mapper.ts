@@ -108,7 +108,7 @@ export function mapIntegratedTaskToTodoistUpdate(
  * Todoist only has completed/not completed
  */
 function mapTodoistStatus(isCompleted: boolean): TaskStatus {
-  return isCompleted ? 'done' : 'todo';
+  return isCompleted ? 'completed' : 'todo';
 }
 
 /**
