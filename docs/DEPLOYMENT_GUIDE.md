@@ -1,8 +1,8 @@
-# Junction Deployment Guide
+# Orqestr Deployment Guide
 
 ## Hosted Deployment (Vercel + Supabase)
 
-This guide will walk you through deploying Junction to Vercel with a cloud Supabase instance.
+This guide will walk you through deploying Orqestr to Vercel with a cloud Supabase instance.
 
 ### Prerequisites
 
@@ -21,7 +21,7 @@ This guide will walk you through deploying Junction to Vercel with a cloud Supab
    - Click "New Project"
    - Choose your organization
    - Enter project details:
-     - Name: `junction` (or your preferred name)
+     - Name: `orqestr` (or your preferred name)
      - Database Password: Generate a strong password (save this!)
      - Region: Choose closest to your users
      - Pricing Plan: Free tier is fine for testing
@@ -86,7 +86,7 @@ If you haven't already, push your code to GitHub:
 # Initialize git (if not already done)
 git init
 git add .
-git commit -m "Initial commit - Junction MVP"
+git commit -m "Initial commit - Orqestr MVP"
 
 # Create a new repository on GitHub, then:
 git remote add origin https://github.com/YOUR_USERNAME/junction.git
@@ -129,7 +129,7 @@ git push -u origin main
 5. **Deploy**:
    - Click "Deploy"
    - Wait for deployment to complete (~2-3 minutes)
-   - You'll get a URL like `https://junction-xxxxx.vercel.app`
+   - You'll get a URL like `https://orqestr-xxxxx.vercel.app`
 
 6. **Update Environment Variables**:
    - Go to Project Settings > Environment Variables
@@ -147,7 +147,7 @@ git push -u origin main
 ## Step 5: Test Your Deployment
 
 1. **Visit your Vercel URL**
-   - You should see the Junction landing page
+   - You should see the Orqestr landing page
 
 2. **Test signup**:
    - Go to `/signup`

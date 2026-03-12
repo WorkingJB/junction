@@ -11,20 +11,20 @@ import {
 import fetch from 'node-fetch';
 
 // Configuration from environment variables
-const JUNCTION_API_URL = process.env.JUNCTION_API_URL || 'http://localhost:3000';
-const JUNCTION_API_KEY = process.env.JUNCTION_API_KEY;
+const ORQESTR_API_URL = process.env.ORQESTR_API_URL || 'http://localhost:3000';
+const ORQESTR_API_KEY = process.env.ORQESTR_API_KEY;
 
-if (!JUNCTION_API_KEY) {
-  console.error('Error: JUNCTION_API_KEY environment variable is required');
+if (!ORQESTR_API_KEY) {
+  console.error('Error: ORQESTR_API_KEY environment variable is required');
   process.exit(1);
 }
 
 // Helper function to make authenticated API calls
-async function junctionAPI(endpoint: string, options: any = {}) {
-  const url = `${JUNCTION_API_URL}${endpoint}`;
+async function orqestrAPI(endpoint: string, options: any = {}) {
+  const url = `${ORQESTR_API_URL}${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${JUNCTION_API_KEY}`,
+    'Authorization': `Bearer ${ORQESTR_API_KEY}`,
     ...options.headers,
   };
 
@@ -44,7 +44,7 @@ async function junctionAPI(endpoint: string, options: any = {}) {
 // Create MCP server
 const server = new Server(
   {
-    name: 'junction-mcp',
+    name: 'orqestr-mcp',
     version: '1.0.0',
   },
   {
@@ -61,7 +61,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: 'create_task',
-        description: 'Create a new task for this agent in Junction',
+        description: 'Create a new task for this agent in Orqestr',
         inputSchema: {
           type: 'object',
           properties: {
@@ -198,7 +198,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'create_task': {
-        const result = await junctionAPI('/api/agent-tasks', {
+        const result = await orqestrAPI('/api/agent-tasks', {
           method: 'POST',
           body: JSON.stringify(args),
         }) as any;
@@ -215,7 +215,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'update_task_status': {
         const { task_id, ...updateData } = args as any;
-        const result = await junctionAPI(`/api/agent-tasks/${task_id}`, {
+        const result = await orqestrAPI(`/api/agent-tasks/${task_id}`, {
           method: 'PATCH',
           body: JSON.stringify(updateData),
         }) as any;
@@ -239,7 +239,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           queryParams.append('limit', (args as any).limit.toString());
         }
 
-        const result = await junctionAPI(
+        const result = await orqestrAPI(
           `/api/agent-tasks?${queryParams.toString()}`
         ) as any;
 
@@ -261,7 +261,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'log_cost': {
-        const result = await junctionAPI('/api/agent-costs', {
+        const result = await orqestrAPI('/api/agent-costs', {
           method: 'POST',
           body: JSON.stringify(args),
         }) as any;
@@ -280,7 +280,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { task_id, prompt } = args as any;
 
         // Update task to waiting_for_input status with the prompt in metadata
-        const result = await junctionAPI(`/api/agent-tasks/${task_id}`, {
+        const result = await orqestrAPI(`/api/agent-tasks/${task_id}`, {
           method: 'PATCH',
           body: JSON.stringify({
             status: 'waiting_for_input',
@@ -295,7 +295,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: `Human input requested for task "${result.task.title}".\n\nPrompt: ${prompt}\n\nThe task status has been updated to waiting_for_input. You can check the Junction dashboard for the response.`,
+              text: `Human input requested for task "${result.task.title}".\n\nPrompt: ${prompt}\n\nThe task status has been updated to waiting_for_input. You can check the Orqestr dashboard for the response.`,
             },
           ],
         };
@@ -322,19 +322,19 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
   return {
     resources: [
       {
-        uri: 'junction://tasks',
+        uri: 'orqestr://tasks',
         name: 'Agent Tasks',
         description: 'List of all tasks for this agent',
         mimeType: 'application/json',
       },
       {
-        uri: 'junction://tasks/pending',
+        uri: 'orqestr://tasks/pending',
         name: 'Pending Tasks',
         description: 'Tasks with pending status',
         mimeType: 'application/json',
       },
       {
-        uri: 'junction://tasks/in_progress',
+        uri: 'orqestr://tasks/in_progress',
         name: 'In Progress Tasks',
         description: 'Tasks currently in progress',
         mimeType: 'application/json',
@@ -350,11 +350,11 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   try {
     let status: string | undefined;
 
-    if (uri === 'junction://tasks') {
+    if (uri === 'orqestr://tasks') {
       status = undefined;
-    } else if (uri === 'junction://tasks/pending') {
+    } else if (uri === 'orqestr://tasks/pending') {
       status = 'pending';
-    } else if (uri === 'junction://tasks/in_progress') {
+    } else if (uri === 'orqestr://tasks/in_progress') {
       status = 'in_progress';
     } else {
       throw new Error(`Unknown resource: ${uri}`);
@@ -365,7 +365,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       queryParams.append('status', status);
     }
 
-    const result = await junctionAPI(`/api/agent-tasks?${queryParams.toString()}`) as any;
+    const result = await orqestrAPI(`/api/agent-tasks?${queryParams.toString()}`) as any;
 
     return {
       contents: [
@@ -393,7 +393,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('Junction MCP server running on stdio');
+  console.error('Orqestr MCP server running on stdio');
 }
 
 main().catch((error) => {

@@ -398,4 +398,4 @@ When in doubt:
 3. Test in both environments before committing
 4. Document any limitations clearly
 
-**Remember**: The goal is to make Junction accessible to everyone, whether they want to self-host or use our hosted version. Maintain parity whenever possible!
+**Remember**: The goal is to make Orqestr accessible to everyone, whether they want to self-host or use our hosted version. Maintain parity whenever possible!

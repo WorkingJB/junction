@@ -1,7 +1,7 @@
 {
   "name": "@junction/agent-sdk",
   "version": "0.1.0",
-  "description": "SDK for integrating AI agents with Junction",
+  "description": "SDK for integrating AI agents with Orqestr",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {

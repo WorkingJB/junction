@@ -1,6 +1,6 @@
 # Quick Deploy to Vercel + Supabase
 
-Follow these steps to deploy Junction to the cloud in ~10 minutes.
+Follow these steps to deploy Orqestr to the cloud in ~10 minutes.
 
 ## Part 1: Supabase Setup (3 minutes)
 
@@ -10,7 +10,7 @@ Follow these steps to deploy Junction to the cloud in ~10 minutes.
 2. Click **"New Project"**
 3. Fill in:
    - **Organization**: Choose or create one
-   - **Name**: `junction`
+   - **Name**: `orqestr`
    - **Database Password**: Click "Generate a password" and **SAVE IT**
    - **Region**: Choose closest to you
 4. Click **"Create new project"**
@@ -56,7 +56,7 @@ git push -u origin main
 
 1. Go to **[vercel.com](https://vercel.com)** and sign in with GitHub
 2. Click **"Add New"** > **"Project"**
-3. Find and **Import** your `junction` repository
+3. Find and **Import** your `orqestr` repository
 4. **Don't click Deploy yet!**
 
 ### 3.2 Configure Build Settings
@@ -77,7 +77,7 @@ Click **"Environment Variables"** and add these (use your Supabase values):
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxxx.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your anon key from Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Your service_role key from Supabase |
-| `NEXT_PUBLIC_APP_URL` | `https://junction.vercel.app` (temporary - we'll update) |
+| `NEXT_PUBLIC_APP_URL` | `https://orqestr.vercel.app` (temporary - we'll update) |
 
 **Important**: Make sure there are no trailing spaces or quotes!
 
@@ -161,7 +161,7 @@ supabase db push
 
 ## 🎉 You're Live!
 
-Your Junction instance is now running in the cloud!
+Your Orqestr instance is now running in the cloud!
 
 **Next Steps:**
 - Bookmark your Vercel URL

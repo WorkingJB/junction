@@ -1,6 +1,6 @@
-# Junction Agent SDK
+# Orqestr Agent SDK
 
-SDK for integrating AI agents with the Junction platform.
+SDK for integrating AI agents with the Orqestr platform.
 
 ## Installation
 
@@ -11,12 +11,12 @@ npm install @junction/agent-sdk
 ## Usage
 
 ```typescript
-import { JunctionClient } from '@junction/agent-sdk';
+import { OrqestrClient } from '@junction/agent-sdk';
 
 // Initialize the client
-const client = new JunctionClient({
+const client = new OrqestrClient({
   apiKey: 'your-api-key',
-  baseUrl: 'https://junction.example.com', // optional, defaults to localhost:3000
+  baseUrl: 'https://orqestr.example.com', // optional, defaults to localhost:3000
 });
 
 // Register your agent
@@ -65,24 +65,24 @@ setInterval(() => {
 
 ## API Reference
 
-### `JunctionClient`
+### `OrqestrClient`
 
-The main client for interacting with Junction.
+The main client for interacting with Orqestr.
 
 #### Constructor
 
 ```typescript
-new JunctionClient(config: JunctionClientConfig)
+new OrqestrClient(config: OrqestrClientConfig)
 ```
 
-- `config.apiKey` (string, required): Your Junction API key
-- `config.baseUrl` (string, optional): The base URL of your Junction instance
+- `config.apiKey` (string, required): Your Orqestr API key
+- `config.baseUrl` (string, optional): The base URL of your Orqestr instance
 
 #### Methods
 
 ##### `register(name, type, metadata?)`
 
-Register your agent with Junction.
+Register your agent with Orqestr.
 
 - `name` (string): Agent name
 - `type` (string): Agent type (e.g., 'claude_code', 'custom')

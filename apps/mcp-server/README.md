@@ -1,10 +1,10 @@
-# Junction MCP Server
+# Orqestr MCP Server
 
-Model Context Protocol (MCP) server for Junction, enabling Claude Desktop users to manage tasks and track costs directly from their conversations.
+Model Context Protocol (MCP) server for Orqestr, enabling Claude Desktop users to manage tasks and track costs directly from their conversations.
 
 ## What is MCP?
 
-The Model Context Protocol (MCP) allows AI assistants like Claude to interact with external tools and data sources. This server exposes Junction's task management capabilities to Claude Desktop, allowing you to:
+The Model Context Protocol (MCP) allows AI assistants like Claude to interact with external tools and data sources. This server exposes Orqestr's task management capabilities to Claude Desktop, allowing you to:
 
 - Create and manage tasks
 - Update task statuses
@@ -27,12 +27,12 @@ pnpm build
 
 ### 1. Get Your API Key
 
-First, register an agent in your Junction dashboard and copy the API key:
+First, register an agent in your Orqestr dashboard and copy the API key:
 
-1. Go to https://your-junction-app.vercel.app/dashboard/agents
+1. Go to https://your-orqestr-app.vercel.app/dashboard/agents
 2. Click "Register Agent"
 3. Enter a name (e.g., "Claude Desktop") and type (e.g., "mcp")
-4. Copy the generated API key (starts with `jnct_`)
+4. Copy the generated API key (starts with `orq_`)
 
 ### 2. Configure Claude Desktop
 
@@ -44,14 +44,14 @@ Add the MCP server to your Claude Desktop configuration file:
 ```json
 {
   "mcpServers": {
-    "junction": {
+    "orqestr": {
       "command": "node",
       "args": [
         "/absolute/path/to/junction/apps/mcp-server/build/index.js"
       ],
       "env": {
-        "JUNCTION_API_KEY": "jnct_your_api_key_here",
-        "JUNCTION_API_URL": "https://your-junction-app.vercel.app"
+        "ORQESTR_API_KEY": "orq_your_api_key_here",
+        "ORQESTR_API_URL": "https://your-orqestr-app.vercel.app"
       }
     }
   }
@@ -59,10 +59,10 @@ Add the MCP server to your Claude Desktop configuration file:
 ```
 
 **Important Notes:**
-- Replace `/absolute/path/to/junction` with the actual absolute path to your Junction project
-- Replace `jnct_your_api_key_here` with your actual API key from step 1
-- Replace `https://your-junction-app.vercel.app` with your Junction app URL
-- For local development, you can use `http://localhost:3000` as the `JUNCTION_API_URL`
+- Replace `/absolute/path/to/junction` with the actual absolute path to your Orqestr project
+- Replace `orq_your_api_key_here` with your actual API key from step 1
+- Replace `https://your-orqestr-app.vercel.app` with your Orqestr app URL
+- For local development, you can use `http://localhost:3000` as the `ORQESTR_API_URL`
 
 ### 3. Restart Claude Desktop
 
@@ -70,16 +70,16 @@ After updating the configuration, restart Claude Desktop to load the MCP server.
 
 ### 4. Verify Installation
 
-In Claude Desktop, you should now see Junction tools available. Try asking:
+In Claude Desktop, you should now see Orqestr tools available. Try asking:
 
 > "Can you create a task for me to review the quarterly report?"
 
-Claude will use the `create_task` tool to add it to your Junction dashboard!
+Claude will use the `create_task` tool to add it to your Orqestr dashboard!
 
 ## Available Tools
 
 ### create_task
-Create a new task in Junction.
+Create a new task in Orqestr.
 
 **Parameters:**
 - `title` (required): Task title
@@ -151,13 +151,13 @@ Request human input for task abc-123 asking "Which database should I use?"
 
 Resources provide contextual information that Claude can access:
 
-### junction://tasks
+### orqestr://tasks
 All tasks for this agent.
 
-### junction://tasks/pending
+### orqestr://tasks/pending
 Only tasks with pending status.
 
-### junction://tasks/in_progress
+### orqestr://tasks/in_progress
 Only tasks currently in progress.
 
 Claude can proactively check these resources to understand your current workload.
@@ -173,8 +173,8 @@ For local development, you can test the MCP server using stdio:
 pnpm build
 
 # Set environment variables
-export JUNCTION_API_KEY="jnct_your_api_key"
-export JUNCTION_API_URL="http://localhost:3000"
+export ORQESTR_API_KEY="orq_your_api_key"
+export ORQESTR_API_URL="http://localhost:3000"
 
 # Run the server
 node build/index.js
@@ -186,19 +186,19 @@ The server will communicate via stdio (standard input/output), which is how MCP 
 
 The MCP server logs to stderr, which you can view in Claude Desktop's logs:
 
-**macOS**: `~/Library/Logs/Claude/mcp-server-junction.log`  
-**Windows**: `%APPDATA%\Claude\Logs\mcp-server-junction.log`
+**macOS**: `~/Library/Logs/Claude/mcp-server-orqestr.log`
+**Windows**: `%APPDATA%\Claude\Logs\mcp-server-orqestr.log`
 
 ## Architecture
 
-The MCP server acts as a bridge between Claude Desktop and your Junction API:
+The MCP server acts as a bridge between Claude Desktop and your Orqestr API:
 
 ```
 Claude Desktop
     ↓ (stdio)
-Junction MCP Server
+Orqestr MCP Server
     ↓ (HTTP REST API)
-Junction Web App (Vercel)
+Orqestr Web App (Vercel)
     ↓
 Supabase Database
 ```
@@ -214,12 +214,12 @@ Supabase Database
 
 ### Server not loading
 - Verify the absolute path in your Claude Desktop config is correct
-- Check that the API key is valid and starts with `jnct_`
+- Check that the API key is valid and starts with `orq_`
 - Ensure the server was built successfully (`pnpm build`)
 
 ### API requests failing
-- Check that `JUNCTION_API_URL` points to your running Junction app
-- Verify the agent exists in your Junction dashboard
+- Check that `ORQESTR_API_URL` points to your running Orqestr app
+- Verify the agent exists in your Orqestr dashboard
 - Check the MCP server logs for error messages
 
 ### Tools not appearing
@@ -229,4 +229,4 @@ Supabase Database
 
 ## License
 
-Part of the Junction monorepo.
+Part of the Orqestr monorepo.

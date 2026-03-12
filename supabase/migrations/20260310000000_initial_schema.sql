@@ -1,4 +1,4 @@
--- Junction Initial Schema Migration
+-- Orqestr Initial Schema Migration
 -- Creates all tables for task management and agent tracking
 
 -- Note: gen_random_uuid() is built-in to Postgres 13+, no extension needed
@@ -392,7 +392,7 @@ CREATE TRIGGER set_agent_task_timestamps_trigger
 
 COMMENT ON TABLE public.users IS 'Extended user profile data linked to Supabase auth.users';
 COMMENT ON TABLE public.tasks IS 'Human-created tasks (native and synced from integrations)';
-COMMENT ON TABLE public.agents IS 'AI agents registered with Junction';
+COMMENT ON TABLE public.agents IS 'AI agents registered with Orqestr';
 COMMENT ON TABLE public.agent_tasks IS 'Tasks created and managed by AI agents';
 COMMENT ON TABLE public.agent_costs IS 'Token usage and cost tracking for agent operations';
 COMMENT ON TABLE public.task_integrations IS 'OAuth tokens and metadata for external task service integrations';

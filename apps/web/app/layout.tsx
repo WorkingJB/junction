@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Junction - Task & Agent Management',
+  title: 'Orqestr - Task & Agent Management',
   description: 'A unified platform for managing human tasks and AI agent work',
 };
 

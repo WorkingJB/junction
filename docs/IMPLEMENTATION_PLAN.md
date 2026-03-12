@@ -793,7 +793,7 @@ junction/
 ## Open Questions
 
 1. **Agent Lifecycle**: How do we handle agents that crash or go offline? Auto-retry? User notification?
-2. **Task Conflicts**: If user edits a task in Todoist and in Junction simultaneously, how do we resolve?
+2. **Task Conflicts**: If user edits a task in Todoist and in Orqestr simultaneously, how do we resolve?
 3. **Agent Permissions**: Should agents be able to edit human tasks, or only create agent tasks?
 4. **Team Features**: When we add teams, how do we handle agent ownership? Can agents work across team members?
 5. **Billing**: For hosted version, do we charge per user, per agent, per token usage, or combination?

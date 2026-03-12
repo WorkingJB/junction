@@ -1,17 +1,20 @@
 import type { CreateTask, UpdateTask, LogCost, RequestInput, AgentTask, Agent } from './types';
 import { CreateTaskSchema, UpdateTaskSchema, LogCostSchema, RequestInputSchema } from './types';
 
-export interface JunctionClientConfig {
+export interface OrqestrClientConfig {
   apiKey: string;
   baseUrl?: string;
 }
 
-export class JunctionClient {
+// Legacy export for backwards compatibility
+export type JunctionClientConfig = OrqestrClientConfig;
+
+export class OrqestrClient {
   private apiKey: string;
   private baseUrl: string;
   private agentId?: string;
 
-  constructor(config: JunctionClientConfig) {
+  constructor(config: OrqestrClientConfig) {
     this.apiKey = config.apiKey;
     this.baseUrl = config.baseUrl || 'http://localhost:3000';
   }
@@ -41,7 +44,7 @@ export class JunctionClient {
   }
 
   /**
-   * Register this agent with Junction
+   * Register this agent with Orqestr
    */
   async register(name: string, type: string, metadata?: Record<string, any>): Promise<Agent> {
     const agent = await this.request<Agent>('/api/agents/register', {
@@ -153,3 +156,6 @@ export class JunctionClient {
     });
   }
 }
+
+// Legacy export for backwards compatibility
+export const JunctionClient = OrqestrClient;

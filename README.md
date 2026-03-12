@@ -1,13 +1,13 @@
-# Junction
+# Orqestr
 
 > A unified platform for managing human tasks and AI agent work
 
-Junction is an open-source task and agent management platform that provides a single pane of glass for understanding what you're working on, what your team (humans and AI agents) is working on, and enabling you to interact and guide those activities from a centralized space.
+Orqestr is an open-source task and agent management platform that provides a single pane of glass for understanding what you're working on, what your team (humans and AI agents) is working on, and enabling you to interact and guide those activities from a centralized space.
 
 ## Features
 
 ### Human Task Management
-- **Native Tasks**: Create and manage tasks directly in Junction
+- **Native Tasks**: Create and manage tasks directly in Orqestr
 - **Task Aggregation**: Sync tasks from external services (Todoist, Microsoft To Do, Asana, Linear, Jira)
 - **Work/Personal Separation**: Organize tasks by context
 - **Smart Filtering**: Filter, search, and sort tasks efficiently
@@ -40,7 +40,7 @@ Junction is an open-source task and agent management platform that provides a si
 
 **Live Demo**: https://junction-web-seven.vercel.app
 
-Test Junction right now! Sign up and explore the interface. Phase 1 (Foundation) is complete with authentication and basic dashboard.
+Test Orqestr right now! Sign up and explore the interface. Phase 1 (Foundation) is complete with authentication and basic dashboard.
 
 ### 🚀 Deploy to Cloud (Recommended for Testing)
 
@@ -102,7 +102,7 @@ pnpm dev
 
 ## Architecture
 
-Junction is built as a monorepo with the following structure:
+Orqestr is built as a monorepo with the following structure:
 
 ```
 junction/
@@ -127,7 +127,7 @@ junction/
 
 ## Agent Integration
 
-Junction supports three ways for agents to integrate:
+Orqestr supports three ways for agents to integrate:
 
 ### 1. MCP Server (Recommended for MCP-compatible agents)
 
@@ -136,12 +136,12 @@ Configure in your Claude Code or other MCP client:
 ```json
 {
   "mcpServers": {
-    "junction": {
+    "orqestr": {
       "command": "node",
       "args": ["/path/to/junction/apps/mcp-server/dist/index.js"],
       "env": {
         "SUPABASE_URL": "your-supabase-url",
-        "JUNCTION_API_KEY": "your-api-key"
+        "ORQESTR_API_KEY": "your-api-key"
       }
     }
   }
@@ -151,11 +151,11 @@ Configure in your Claude Code or other MCP client:
 ### 2. REST API (For any agent)
 
 ```typescript
-import { JunctionClient } from '@junction/agent-sdk';
+import { OrqestrClient } from '@junction/agent-sdk';
 
-const client = new JunctionClient({
+const client = new OrqestrClient({
   apiKey: 'your-api-key',
-  baseUrl: 'https://junction.example.com',
+  baseUrl: 'https://orqestr.example.com',
 });
 
 await client.register('My Agent', 'custom');
@@ -170,7 +170,7 @@ await client.updateTask(task.id, { status: 'completed' });
 
 Configure your agent to send webhooks to:
 ```
-POST https://junction.example.com/api/webhooks/agent-events
+POST https://orqestr.example.com/api/webhooks/agent-events
 ```
 
 See [Agent Integration Guide](./docs/AGENT_INTEGRATION_GUIDE.md) for detailed instructions.
@@ -230,8 +230,8 @@ docker compose down
 - [Parity Documentation](./docs/HOSTED_SELFHOSTED_PARITY.md) - Maintaining hosted/self-hosted parity
 - [Agent Integration Guide](./docs/AGENT_INTEGRATION_GUIDE.md) - How to integrate your agents (coming soon)
 - [API Reference](./docs/API_REFERENCE.md) - REST API documentation (coming soon)
-- [Self-Hosting Guide](./docs/SELF_HOSTING.md) - Deploy Junction yourself (coming soon)
-- [Contributing Guide](./docs/CONTRIBUTING.md) - How to contribute to Junction
+- [Self-Hosting Guide](./docs/SELF_HOSTING.md) - Deploy Orqestr yourself (coming soon)
+- [Contributing Guide](./docs/CONTRIBUTING.md) - How to contribute to Orqestr
 
 ## Roadmap
 
@@ -306,4 +306,4 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-Built with ❤️ by the Junction team
+Built with ❤️ by the Orqestr team

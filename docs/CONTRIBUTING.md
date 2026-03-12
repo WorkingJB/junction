@@ -1,6 +1,6 @@
-# Contributing to Junction
+# Contributing to Orqestr
 
-Thank you for your interest in contributing to Junction! This guide will help you get started.
+Thank you for your interest in contributing to Orqestr! This guide will help you get started.
 
 ## Code of Conduct
 
@@ -278,4 +278,4 @@ Contributors will be recognized in:
 - Release notes
 - Our website (coming soon)
 
-Thank you for contributing to Junction! 🎉
+Thank you for contributing to Orqestr! 🎉

@@ -71,7 +71,7 @@ export default function DashboardLayout({
         <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
           <div className="flex flex-1 items-center">
             <Link href="/dashboard" className="text-xl font-semibold">
-              Junction
+              Orqestr
             </Link>
           </div>
           <div className="flex items-center gap-x-2">
@@ -98,7 +98,7 @@ export default function DashboardLayout({
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background px-6 pb-4 ring-1 ring-border">
                 <div className="flex h-16 shrink-0 items-center">
                   <Link href="/dashboard" className="text-xl font-semibold">
-                    Junction
+                    Orqestr
                   </Link>
                 </div>
                 <nav className="flex flex-1 flex-col">
@@ -139,7 +139,7 @@ export default function DashboardLayout({
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r bg-background px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
             <Link href="/dashboard" className="text-xl font-semibold">
-              Junction
+              Orqestr
             </Link>
           </div>
           <nav className="flex flex-1 flex-col">
