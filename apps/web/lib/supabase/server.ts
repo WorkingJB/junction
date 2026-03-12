@@ -25,6 +25,14 @@ export async function createClient() {
           }
         },
       },
+      auth: {
+        // Disable storage to avoid LockManager issues in serverless
+        storage: undefined,
+        // Disable auto-refresh to avoid background token refresh in serverless
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
     }
   );
 }
