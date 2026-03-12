@@ -27,6 +27,13 @@ export async function updateSession(request: NextRequest) {
           );
         },
       },
+      auth: {
+        // Disable storage to avoid LockManager issues
+        storage: undefined,
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
     }
   );
 
