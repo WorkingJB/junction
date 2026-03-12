@@ -18,10 +18,11 @@ import { createClient } from '@/lib/supabase/server';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
   try {
-    const provider = params.provider.toLowerCase() as IntegrationProvider;
+    const { provider: providerParam } = await params;
+    const provider = providerParam.toLowerCase() as IntegrationProvider;
     const supabase = await createClient();
 
     // Get current user
@@ -41,6 +42,7 @@ export async function GET(
     const state = generateState();
 
     // Store state in session/database for verification
+    // @ts-ignore - Database types need to be regenerated
     await supabase.from('oauth_states').insert({
       user_id: user.id,
       provider,

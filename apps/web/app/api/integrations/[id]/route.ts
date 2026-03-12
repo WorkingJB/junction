@@ -11,10 +11,11 @@ import { createClient } from '@/lib/supabase/server';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
+    const { id } = await params;
 
     // Get current user
     const {
@@ -30,7 +31,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('task_integrations')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id); // Ensure user owns this integration
 
     if (error) {

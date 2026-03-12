@@ -14,10 +14,11 @@ import { handleApiError, ValidationError, RateLimitError } from '@/lib/api-error
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
   try {
-    const provider = params.provider.toLowerCase() as IntegrationProvider;
+    const { provider: providerParam } = await params;
+    const provider = providerParam.toLowerCase() as IntegrationProvider;
 
     // Rate limiting per provider
     const rateLimitResult = checkRateLimit({
@@ -111,10 +112,11 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
   try {
-    const provider = params.provider.toLowerCase();
+    const { provider: providerParam } = await params;
+    const provider = providerParam.toLowerCase();
 
     // Handle Asana webhook verification
     if (provider === 'asana') {

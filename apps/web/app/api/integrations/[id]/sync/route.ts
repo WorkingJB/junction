@@ -19,10 +19,11 @@ import { syncTasksWithProvider } from '@/app/services/task-sync-service';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
+    const { id } = await params;
 
     // Get current user
     const {
@@ -35,19 +36,22 @@ export async function POST(
     }
 
     // Fetch the integration
-    const { data: integration, error: fetchError } = await supabase
+    // @ts-ignore - Database types need to be regenerated
+    const { data: integrationData, error: fetchError } = await supabase
       .from('task_integrations')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
-    if (fetchError || !integration) {
+    if (fetchError || !integrationData) {
       return NextResponse.json(
         { error: 'Integration not found' },
         { status: 404 }
       );
     }
+
+    const integration = integrationData as any;
 
     if (!integration.sync_enabled) {
       return NextResponse.json(

@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch user's integrations
+    // @ts-ignore - Database types need to be regenerated
     const { data: integrations, error } = await supabase
       .from('task_integrations')
       .select('*')
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Map to a safe response format (don't expose tokens)
-    const safeIntegrations = integrations.map((integration) => ({
+    const safeIntegrations = (integrations as any[]).map((integration) => ({
       id: integration.id,
       provider: integration.provider,
       syncEnabled: integration.sync_enabled,

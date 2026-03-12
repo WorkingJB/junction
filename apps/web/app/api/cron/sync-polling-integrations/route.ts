@@ -6,7 +6,7 @@
  * {
  *   "crons": [{
  *     "path": "/api/cron/sync-polling-integrations",
- *     "schedule": "*/15 * * * *"
+ *     "schedule": "* /15 * * * *" (remove space after *)
  *   }]
  * }
  */
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch integrations that require polling and are due for a sync
     const now = new Date();
+    // @ts-ignore - Database types need to be regenerated
     const { data: integrations, error } = await supabase
       .from('task_integrations')
       .select('*')
@@ -70,7 +71,8 @@ export async function GET(request: NextRequest) {
     };
 
     // Process each integration
-    for (const integration of integrations) {
+    for (const int of integrations) {
+      const integration = int as any;
       try {
         // Check if sync is due based on polling interval
         const pollingIntervalMs =
@@ -121,9 +123,8 @@ export async function GET(request: NextRequest) {
         );
 
         // Update last poll time
-        await supabase
-          .from('task_integrations')
-          .update({
+        // @ts-ignore - Database types need to be regenerated
+        const updateResult = await supabase.from('task_integrations').update({
             last_poll_at: now.toISOString(),
             last_sync: now.toISOString(),
             sync_errors: result.success ? 0 : (integration.sync_errors || 0) + 1,
