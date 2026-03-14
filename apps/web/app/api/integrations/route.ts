@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuthService, createRepositories } from '@orqestr/database';
+import type { TaskIntegration } from '@orqestr/database';
 
 /**
  * GET /api/integrations
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
       userId: user.id,
     });
 
-    if (error) {
+    if (error || !integrations) {
       console.error('Failed to fetch integrations:', error);
       return NextResponse.json(
         { error: 'Failed to fetch integrations' },
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Map to a safe response format (don't expose tokens)
-    const safeIntegrations = integrations.map((integration) => ({
+    const safeIntegrations = integrations.map((integration: TaskIntegration) => ({
       id: integration.id,
       provider: integration.provider,
       syncEnabled: integration.sync_enabled,
