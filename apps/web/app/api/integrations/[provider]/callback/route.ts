@@ -45,8 +45,8 @@ export async function GET(
     const supabase = await createClient();
 
     // Verify state to prevent CSRF
-    // @ts-ignore - Database types need to be regenerated
-    const { data: stateDataRaw, error: stateError } = await supabase
+    // Database types need to be regenerated to include oauth_states
+    const { data: stateDataRaw, error: stateError } = await (supabase as any)
       .from('oauth_states')
       .select('*')
       .eq('state', state)
@@ -63,16 +63,16 @@ export async function GET(
 
     // Check if state has expired
     if (new Date(stateData.expires_at) < new Date()) {
-      // @ts-ignore - Database types need to be regenerated
-      await supabase.from('oauth_states').delete().eq('id', stateData.id);
+      // Database types need to be regenerated to include oauth_states
+      await (supabase as any).from('oauth_states').delete().eq('id', stateData.id);
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?integration_error=state_expired`
       );
     }
 
     // Delete used state
-    // @ts-ignore - Database types need to be regenerated
-    await supabase.from('oauth_states').delete().eq('id', stateData.id);
+    // Database types need to be regenerated to include oauth_states
+    await (supabase as any).from('oauth_states').delete().eq('id', stateData.id);
 
     // Get adapter for provider
     const adapter = getAdapter(provider);

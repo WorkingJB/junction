@@ -82,6 +82,14 @@ export type {
   AgentCostWithAgent,
 } from './agent-costs-repository';
 
+// Import types for the IRepositories interface
+import type { ITasksRepository } from './tasks-repository';
+import type { IAgentsRepository } from './agents-repository';
+import type { IUserSettingsRepository } from './settings-repository';
+import type { IAgentTasksRepository } from './agent-tasks-repository';
+import type { IIntegrationsRepository } from './integrations-repository';
+import type { IAgentCostsRepository } from './agent-costs-repository';
+
 /**
  * Repository collection interface
  * Groups all repositories together for easy access

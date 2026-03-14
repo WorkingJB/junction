@@ -180,7 +180,7 @@ export class SupabaseIntegrationsRepository implements IIntegrationsRepository {
       .update({
         last_error: errorMessage,
         last_error_at: new Date().toISOString(),
-        sync_errors: this.supabase.rpc('increment_sync_errors', { integration_id: id }) as any,
+        sync_errors: (this.supabase as any).rpc('increment_sync_errors', { integration_id: id }),
       })
       .eq('id', id)
       .eq('user_id', userId)
