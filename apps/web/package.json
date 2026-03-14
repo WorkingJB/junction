@@ -10,10 +10,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@orqestr/database": "workspace:*",
     "@junction/integrations": "workspace:*",
-    "@supabase/ssr": "^0.6.0",
-    "@supabase/supabase-js": "^2.50.0",
+    "@orqestr/database": "workspace:*",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.99.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.577.0",
     "next": "^15.1.3",
