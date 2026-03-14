@@ -53,7 +53,7 @@ export async function GET(
 
     // Get OAuth client credentials from environment
     const clientId = process.env[`${provider.toUpperCase()}_CLIENT_ID`];
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/${provider}/callback`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/${provider}/callback`;
 
     if (!clientId) {
       return NextResponse.json(

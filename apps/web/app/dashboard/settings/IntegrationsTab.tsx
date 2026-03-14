@@ -82,7 +82,7 @@ export function IntegrationsTab() {
   const connectProvider = async (provider: string) => {
     try {
       // Redirect to OAuth flow
-      window.location.href = `/api/integrations/${provider}/oauth`;
+      window.location.href = `/api/oauth/${provider}/oauth`;
     } catch (err: any) {
       setError(err.message);
     }
