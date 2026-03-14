@@ -3,16 +3,31 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, AgentCost, AgentCostInsert } from '../../types';
+import type { Database } from '../../types';
 import type {
   IAgentCostsRepository,
+  AgentCost,
+  AgentCostInsert,
   AgentCostFilter,
   AgentCostSummary,
   AgentCostWithAgent,
 } from '../agent-costs-repository';
 import type { DbResult } from '../types';
-import { toDbError } from './utils';
 
+/**
+ * Convert Supabase error to DbError
+ */
+function toDbError(error: any) {
+  return {
+    message: error.message || 'Database operation failed',
+    code: error.code,
+    details: error.details,
+  };
+}
+
+/**
+ * Supabase implementation of agent costs repository
+ */
 export class SupabaseAgentCostsRepository implements IAgentCostsRepository {
   constructor(private supabase: SupabaseClient<Database>) {}
 
