@@ -57,13 +57,13 @@ export async function GET(request: NextRequest) {
       agentId: agentId || undefined,
     });
 
-    if (error) {
+    if (error || !tasksData) {
       console.error('Error fetching agent tasks:', error);
       return NextResponse.json({ error: 'Failed to fetch agent tasks' }, { status: 500 });
     }
 
     // Fetch agent details for each task
-    const uniqueAgentIds = [...new Set(tasksData.map(t => t.agent_id))];
+    const uniqueAgentIds = [...new Set(tasksData.map((t) => t.agent_id))];
     const agentDetailsMap = new Map();
 
     for (const agentId of uniqueAgentIds) {
