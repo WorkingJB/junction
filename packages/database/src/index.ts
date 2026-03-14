@@ -1,4 +1,9 @@
 // Database package entry point
+
+// Legacy exports (for backward compatibility)
 export * from './client';
 export * from './types';
-export * from './queries';
+
+// New abstraction layer exports
+export * from './auth';
+export * from './repositories';

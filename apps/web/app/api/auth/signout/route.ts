@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerAuthService } from '@orqestr/database';
 import { redirect } from 'next/navigation';
 
 export async function POST() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  const authService = await createServerAuthService();
+  await authService.signOut();
   redirect('/login');
 }

@@ -1,8 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
-
-type AgentUpdate = Database['public']['Tables']['agents']['Update'];
+import { createServerAuthService, createRepositories } from '@orqestr/database';
 
 // GET /api/agents/[id] - Get a specific agent
 export async function GET(
@@ -10,22 +7,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
 
-    const { data: agent, error } = await supabase
-      .from('agents')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
+    // Get agent using repository
+    const repos = await createRepositories();
+    const { data: agent, error } = await repos.agents.getById(id, user.id);
 
     if (error) {
       console.error('Error fetching agent:', error);
@@ -48,10 +42,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -60,9 +54,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Prepare update data
-    const updateData: any = {
-      updated_at: new Date().toISOString(),
-    };
+    const updateData: any = {};
 
     // Only include fields that are provided
     if (body.name !== undefined) updateData.name = body.name.trim();
@@ -73,15 +65,9 @@ export async function PATCH(
     // Don't allow updating api_key through this endpoint for security
     // Don't allow updating user_id
 
-    // Update agent (RLS ensures user can only update their own agents)
-    const { data: agent, error } = await supabase
-      .from('agents')
-      // @ts-ignore - Supabase type inference issue with dynamic partial updates
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single();
+    // Update agent using repository
+    const repos = await createRepositories();
+    const { data: agent, error } = await repos.agents.update(id, user.id, updateData);
 
     if (error) {
       console.error('Error updating agent:', error);
@@ -104,23 +90,20 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
 
-    // Delete agent (RLS ensures user can only delete their own agents)
+    // Delete agent using repository
     // Note: In production, you might want to check for associated agent_tasks first
-    const { error } = await supabase
-      .from('agents')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+    const repos = await createRepositories();
+    const { error } = await repos.agents.delete(id, user.id);
 
     if (error) {
       console.error('Error deleting agent:', error);

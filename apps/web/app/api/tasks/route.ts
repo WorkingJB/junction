@@ -1,51 +1,36 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
-
-type Task = Database['public']['Tables']['tasks']['Row'];
-type TaskInsert = Database['public']['Tables']['tasks']['Insert'];
-type TaskUpdate = Database['public']['Tables']['tasks']['Update'];
+import { createServerAuthService, createRepositories } from '@orqestr/database';
+import type { TaskStatus, TaskType, TaskPriority } from '@orqestr/database';
 
 // GET /api/tasks - List all tasks for the current user
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get query parameters for filtering
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status') as Task['status'] | null;
-    const type = searchParams.get('type') as Task['type'] | null;
-    const priority = searchParams.get('priority') as Task['priority'] | null;
+    const status = searchParams.get('status') as TaskStatus | null;
+    const type = searchParams.get('type') as TaskType | null;
+    const priority = searchParams.get('priority') as TaskPriority | null;
     const search = searchParams.get('search');
 
-    // Build query
-    let query = supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    // Get repositories
+    const repos = await createRepositories();
 
-    // Apply filters
-    if (status) {
-      query = query.eq('status', status);
-    }
-    if (type) {
-      query = query.eq('type', type);
-    }
-    if (priority) {
-      query = query.eq('priority', priority);
-    }
-    if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
-    }
-
-    const { data: tasks, error } = await query;
+    // Fetch tasks using repository
+    const { data: tasks, error } = await repos.tasks.getMany({
+      userId: user.id,
+      status: status || undefined,
+      type: type || undefined,
+      priority: priority || undefined,
+      search: search || undefined,
+    });
 
     if (error) {
       console.error('Error fetching tasks:', error);
@@ -62,10 +47,10 @@ export async function GET(request: NextRequest) {
 // POST /api/tasks - Create a new task
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -78,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare task data
-    const taskData: TaskInsert = {
+    const taskData = {
       user_id: user.id,
       title: body.title.trim(),
       description: body.description?.trim() || null,
@@ -92,12 +77,9 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata || null,
     };
 
-    const { data: task, error } = await supabase
-      .from('tasks')
-      // @ts-ignore - Supabase type inference issue
-      .insert(taskData)
-      .select()
-      .single();
+    // Get repositories and create task
+    const repos = await createRepositories();
+    const { data: task, error } = await repos.tasks.create(taskData);
 
     if (error) {
       console.error('Error creating task:', error);

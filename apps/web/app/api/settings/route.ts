@@ -1,44 +1,22 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
-
-type UserSettings = Database['public']['Tables']['user_settings']['Row'];
-type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update'];
+import { createServerAuthService, createRepositories } from '@orqestr/database';
 
 // GET /api/settings - Get user settings
 export async function GET() {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: settings, error } = await supabase
-      .from('user_settings')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+    // Get settings using repository (automatically creates if none exist)
+    const repos = await createRepositories();
+    const { data: settings, error } = await repos.settings.getByUserId(user.id);
 
     if (error) {
-      // If no settings exist, create default settings
-      if (error.code === 'PGRST116') {
-        const { data: newSettings, error: insertError } = await supabase
-          .from('user_settings')
-          // @ts-ignore - Supabase type inference issue
-          .insert({ user_id: user.id })
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error('Error creating settings:', insertError);
-          return NextResponse.json({ error: 'Failed to create settings' }, { status: 500 });
-        }
-
-        return NextResponse.json({ settings: newSettings });
-      }
-
       console.error('Error fetching settings:', error);
       return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
     }
@@ -53,9 +31,10 @@ export async function GET() {
 // PATCH /api/settings - Update user settings
 export async function PATCH(request: Request) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -83,7 +62,7 @@ export async function PATCH(request: Request) {
     }
 
     // Build update object (only include provided fields)
-    const updateData: UserSettingsUpdate = {};
+    const updateData: any = {};
     const allowedFields = [
       'theme',
       'compact_mode',
@@ -101,17 +80,13 @@ export async function PATCH(request: Request) {
 
     for (const field of allowedFields) {
       if (field in body) {
-        (updateData as any)[field] = body[field];
+        updateData[field] = body[field];
       }
     }
 
-    const { data: updatedSettings, error } = await supabase
-      .from('user_settings')
-      // @ts-ignore - Supabase type inference issue with dynamic partial updates
-      .update(updateData)
-      .eq('user_id', user.id)
-      .select()
-      .single();
+    // Update settings using repository
+    const repos = await createRepositories();
+    const { data: updatedSettings, error } = await repos.settings.update(user.id, updateData);
 
     if (error) {
       console.error('Error updating settings:', error);

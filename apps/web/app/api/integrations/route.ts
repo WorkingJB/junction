@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerAuthService, createRepositories } from '@orqestr/database';
 
 /**
  * GET /api/integrations
@@ -11,25 +11,19 @@ import { createClient } from '@/lib/supabase/server';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch user's integrations
-    // @ts-ignore - Database types need to be regenerated
-    const { data: integrations, error } = await supabase
-      .from('task_integrations')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    // Fetch user's integrations using repository
+    const repos = await createRepositories();
+    const { data: integrations, error } = await repos.integrations.getMany({
+      userId: user.id,
+    });
 
     if (error) {
       console.error('Failed to fetch integrations:', error);
@@ -40,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Map to a safe response format (don't expose tokens)
-    const safeIntegrations = (integrations as any[]).map((integration) => ({
+    const safeIntegrations = integrations.map((integration) => ({
       id: integration.id,
       provider: integration.provider,
       syncEnabled: integration.sync_enabled,

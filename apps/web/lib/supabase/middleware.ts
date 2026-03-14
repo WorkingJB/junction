@@ -2,6 +2,17 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@orqestr/database';
 
+/**
+ * Middleware session handler
+ *
+ * Note: We still use Supabase directly in middleware because:
+ * 1. Middleware runs on Edge runtime with special requirements
+ * 2. Cookie handling needs to be synchronized with the response
+ * 3. The abstraction layer is designed for API routes and Server Components
+ *
+ * If migrating away from Supabase, this middleware will need to be rewritten
+ * to use the new auth provider's middleware approach.
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,

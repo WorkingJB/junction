@@ -1,11 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
+import { createRepositories } from '@orqestr/database';
 
-type AgentTaskUpdate = Database['public']['Tables']['agent_tasks']['Update'];
-
-// Helper to authenticate via API key
-async function authenticateAgent(request: NextRequest, supabase: any) {
+// Helper to authenticate agent via API key
+async function authenticateAgent(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,12 +11,9 @@ async function authenticateAgent(request: NextRequest, supabase: any) {
 
   const apiKey = authHeader.replace('Bearer ', '');
 
-  // Find agent by API key
-  const { data: agent, error } = await supabase
-    .from('agents')
-    .select('id, user_id')
-    .eq('api_key', apiKey)
-    .single();
+  // Use agents repository to authenticate
+  const repos = await createRepositories();
+  const { data: agent, error } = await repos.agents.getByApiKey(apiKey);
 
   if (error || !agent) {
     return { error: 'Invalid API key', status: 401 };
@@ -34,10 +28,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-
     // Authenticate via API key
-    const authResult = await authenticateAgent(request, supabase);
+    const authResult = await authenticateAgent(request);
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
@@ -47,9 +39,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Prepare update data
-    const updateData: any = {
-      updated_at: new Date().toISOString(),
-    };
+    const updateData: any = {};
 
     // Only include fields that are provided
     if (body.title !== undefined) updateData.title = body.title.trim();
@@ -58,7 +48,7 @@ export async function PATCH(
     if (body.status !== undefined) {
       updateData.status = body.status;
 
-      // Auto-set timestamps based on status
+      // Auto-set timestamps based on status (also handled by DB trigger)
       if (body.status === 'in_progress' && !body.started_at) {
         updateData.started_at = new Date().toISOString();
       } else if (body.status === 'completed' || body.status === 'failed') {
@@ -70,15 +60,9 @@ export async function PATCH(
     if (body.error_message !== undefined) updateData.error_message = body.error_message;
     if (body.metadata !== undefined) updateData.metadata = body.metadata;
 
-    // Update task (ensure it belongs to this agent)
-    const { data: task, error } = await supabase
-      .from('agent_tasks')
-      // @ts-ignore - Supabase type inference issue
-      .update(updateData)
-      .eq('id', id)
-      .eq('agent_id', agent.id)
-      .select()
-      .single();
+    // Update task using repository (ensure it belongs to this agent)
+    const repos = await createRepositories();
+    const { data: task, error } = await repos.agentTasks.update(id, agent.user_id, updateData);
 
     if (error) {
       console.error('Error updating agent task:', error);
@@ -86,6 +70,11 @@ export async function PATCH(
         return NextResponse.json({ error: 'Task not found' }, { status: 404 });
       }
       return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
+    }
+
+    // Verify task belongs to this agent
+    if (task && task.agent_id !== agent.id) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
     return NextResponse.json({ task });
@@ -101,10 +90,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-
     // Authenticate via API key
-    const authResult = await authenticateAgent(request, supabase);
+    const authResult = await authenticateAgent(request);
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
@@ -112,12 +99,16 @@ export async function DELETE(
     const { agent } = authResult;
     const { id } = await params;
 
-    // Delete task (ensure it belongs to this agent)
-    const { error } = await supabase
-      .from('agent_tasks')
-      .delete()
-      .eq('id', id)
-      .eq('agent_id', agent.id);
+    // First verify task belongs to this agent
+    const repos = await createRepositories();
+    const { data: task } = await repos.agentTasks.getById(id, agent.user_id);
+
+    if (!task || task.agent_id !== agent.id) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+
+    // Delete task using repository
+    const { error } = await repos.agentTasks.delete(id, agent.user_id);
 
     if (error) {
       console.error('Error deleting agent task:', error);

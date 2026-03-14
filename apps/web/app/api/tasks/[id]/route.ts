@@ -1,8 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
-
-type TaskUpdate = Database['public']['Tables']['tasks']['Update'];
+import { createServerAuthService, createRepositories } from '@orqestr/database';
 
 // PATCH /api/tasks/[id] - Update a task
 export async function PATCH(
@@ -10,10 +7,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -22,9 +19,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Prepare update data
-    const updateData: any = {
-      updated_at: new Date().toISOString(),
-    };
+    const updateData: any = {};
 
     // Only include fields that are provided
     if (body.title !== undefined) updateData.title = body.title.trim();
@@ -32,6 +27,7 @@ export async function PATCH(
     if (body.status !== undefined) {
       updateData.status = body.status;
       // Auto-set completed_at when status changes to completed
+      // Note: This is also handled by database trigger, but we set it here for consistency
       if (body.status === 'completed') {
         updateData.completed_at = new Date().toISOString();
       } else if (body.status !== 'completed') {
@@ -43,15 +39,9 @@ export async function PATCH(
     if (body.due_date !== undefined) updateData.due_date = body.due_date || null;
     if (body.metadata !== undefined) updateData.metadata = body.metadata;
 
-    // Update task (RLS ensures user can only update their own tasks)
-    const { data: task, error } = await supabase
-      .from('tasks')
-      // @ts-ignore - Supabase type inference issue with dynamic partial updates
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single();
+    // Update task using repository
+    const repos = await createRepositories();
+    const { data: task, error } = await repos.tasks.update(id, user.id, updateData);
 
     if (error) {
       console.error('Error updating task:', error);
@@ -74,22 +64,19 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
 
-    // Delete task (RLS ensures user can only delete their own tasks)
-    const { error } = await supabase
-      .from('tasks')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+    // Delete task using repository
+    const repos = await createRepositories();
+    const { error } = await repos.tasks.delete(id, user.id);
 
     if (error) {
       console.error('Error deleting task:', error);

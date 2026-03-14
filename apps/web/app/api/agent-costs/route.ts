@@ -1,11 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
+import { createServerAuthService, createRepositories } from '@orqestr/database';
+import type { AgentCostInsert } from '@orqestr/database';
 
-type AgentCostInsert = Database['public']['Tables']['agent_costs']['Insert'];
-
-// Helper to authenticate via API key
-async function authenticateAgent(request: NextRequest, supabase: any) {
+// Helper to authenticate agent via API key
+async function authenticateAgent(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,12 +12,9 @@ async function authenticateAgent(request: NextRequest, supabase: any) {
 
   const apiKey = authHeader.replace('Bearer ', '');
 
-  // Find agent by API key
-  const { data: agent, error } = await supabase
-    .from('agents')
-    .select('id, user_id')
-    .eq('api_key', apiKey)
-    .single();
+  // Use agents repository to authenticate
+  const repos = await createRepositories();
+  const { data: agent, error } = await repos.agents.getByApiKey(apiKey);
 
   if (error || !agent) {
     return { error: 'Invalid API key', status: 401 };
@@ -31,58 +26,45 @@ async function authenticateAgent(request: NextRequest, supabase: any) {
 // GET /api/agent-costs - Get agent costs (for dashboard/reporting)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // User auth for viewing costs
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
-    const agentId = searchParams.get('agent_id');
-    const startDate = searchParams.get('start_date');
-    const endDate = searchParams.get('end_date');
+    const agentId = searchParams.get('agent_id') || undefined;
+    const startDate = searchParams.get('start_date') || undefined;
+    const endDate = searchParams.get('end_date') || undefined;
 
-    // Build query
-    let query = supabase
-      .from('agent_costs')
-      .select('*, agents(name, type)')
-      .eq('user_id', user.id)
-      .order('timestamp', { ascending: false });
-
-    // Apply filters
-    if (agentId) {
-      query = query.eq('agent_id', agentId);
-    }
-    if (startDate) {
-      query = query.gte('timestamp', startDate);
-    }
-    if (endDate) {
-      query = query.lte('timestamp', endDate);
-    }
-
-    const { data: costs, error } = await query;
+    // Get repositories and fetch costs with agent details
+    const repos = await createRepositories();
+    const { data: costs, error } = await repos.agentCosts.getManyWithAgents({
+      userId: user.id,
+      agentId,
+      startDate,
+      endDate,
+    });
 
     if (error) {
       console.error('Error fetching agent costs:', error);
       return NextResponse.json({ error: 'Failed to fetch agent costs' }, { status: 500 });
     }
 
-    // Calculate totals
-    const totalCost = costs?.reduce((sum: number, cost: any) => sum + cost.cost_usd, 0) || 0;
-    const totalInputTokens = costs?.reduce((sum: number, cost: any) => sum + cost.input_tokens, 0) || 0;
-    const totalOutputTokens = costs?.reduce((sum: number, cost: any) => sum + cost.output_tokens, 0) || 0;
+    // Get summary statistics
+    const { data: summary } = await repos.agentCosts.getSummary({
+      userId: user.id,
+      agentId,
+      startDate,
+      endDate,
+    });
 
     return NextResponse.json({
       costs,
-      summary: {
-        total_cost_usd: totalCost,
-        total_input_tokens: totalInputTokens,
-        total_output_tokens: totalOutputTokens,
-        count: costs?.length || 0,
-      }
+      summary,
     });
   } catch (error) {
     console.error('Unexpected error in GET /api/agent-costs:', error);
@@ -93,10 +75,8 @@ export async function GET(request: NextRequest) {
 // POST /api/agent-costs - Log agent cost/token usage
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
     // Authenticate via API key
-    const authResult = await authenticateAgent(request, supabase);
+    const authResult = await authenticateAgent(request);
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
@@ -131,12 +111,9 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata || null,
     };
 
-    const { data: cost, error } = await supabase
-      .from('agent_costs')
-      // @ts-ignore - Supabase type inference issue
-      .insert(costData)
-      .select()
-      .single();
+    // Create cost entry using repository
+    const repos = await createRepositories();
+    const { data: cost, error } = await repos.agentCosts.create(costData);
 
     if (error) {
       console.error('Error logging agent cost:', error);

@@ -1,10 +1,7 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import type { Database } from '@orqestr/database';
+import { createServerAuthService, createRepositories } from '@orqestr/database';
+import type { AgentStatus } from '@orqestr/database';
 import { randomBytes } from 'crypto';
-
-type Agent = Database['public']['Tables']['agents']['Row'];
-type AgentInsert = Database['public']['Tables']['agents']['Insert'];
 
 // Generate a secure API key
 function generateApiKey(): string {
@@ -16,35 +13,26 @@ function generateApiKey(): string {
 // GET /api/agents - List all agents for the current user
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get query parameters for filtering
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status') as Agent['status'] | null;
+    const status = searchParams.get('status') as AgentStatus | null;
     const type = searchParams.get('type');
 
-    // Build query
-    let query = supabase
-      .from('agents')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    // Apply filters
-    if (status) {
-      query = query.eq('status', status);
-    }
-    if (type) {
-      query = query.eq('type', type);
-    }
-
-    const { data: agents, error } = await query;
+    // Get repositories and fetch agents
+    const repos = await createRepositories();
+    const { data: agents, error } = await repos.agents.getMany({
+      userId: user.id,
+      status: status || undefined,
+      type: type || undefined,
+    });
 
     if (error) {
       console.error('Error fetching agents:', error);
@@ -61,10 +49,10 @@ export async function GET(request: NextRequest) {
 // POST /api/agents - Register a new agent
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Get auth service and check authentication
+    const authService = await createServerAuthService();
+    const { data: user, error: authError } = await authService.getCurrentUser();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -84,22 +72,19 @@ export async function POST(request: NextRequest) {
     const apiKey = generateApiKey();
 
     // Prepare agent data
-    const agentData: AgentInsert = {
+    const agentData = {
       user_id: user.id,
       name: body.name.trim(),
       type: body.type.trim(),
-      status: 'offline', // New agents start as offline
+      status: 'offline' as const, // New agents start as offline
       api_key: apiKey,
       last_heartbeat: null,
       metadata: body.metadata || null,
     };
 
-    const { data: agent, error } = await supabase
-      .from('agents')
-      // @ts-ignore - Supabase type inference issue
-      .insert(agentData)
-      .select()
-      .single();
+    // Create agent using repository
+    const repos = await createRepositories();
+    const { data: agent, error } = await repos.agents.create(agentData);
 
     if (error) {
       console.error('Error creating agent:', error);
