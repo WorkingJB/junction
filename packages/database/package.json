@@ -13,8 +13,12 @@
     "@supabase/supabase-js": "^2.50.0",
     "zod": "^3.24.1"
   },
+  "peerDependencies": {
+    "next": ">=15.0.0"
+  },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "next": "^15.5.12",
     "typescript": "^5.7.2"
   }
 }
