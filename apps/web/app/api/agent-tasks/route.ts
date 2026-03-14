@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuthService, createRepositories } from '@orqestr/database';
-import type { AgentTaskStatus } from '@orqestr/database';
+import type { AgentTaskStatus, AgentTask } from '@orqestr/database';
 
 // Helper to authenticate agent via API key
 async function authenticateAgent(request: NextRequest) {
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch agent details for each task
-    const uniqueAgentIds = [...new Set(tasksData.map((t) => t.agent_id))];
+    const uniqueAgentIds = [...new Set(tasksData.map((t: AgentTask) => t.agent_id))];
     const agentDetailsMap = new Map();
 
     for (const agentId of uniqueAgentIds) {
@@ -78,12 +78,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Enrich tasks with agent details
-    const tasks = tasksData.map(task => ({
+    const tasksWithAgents = tasksData.map((task: AgentTask) => ({
       ...task,
       agents: agentDetailsMap.get(task.agent_id) || null,
     }));
 
-    return NextResponse.json({ tasks });
+    return NextResponse.json({ tasks: tasksWithAgents });
   } catch (error) {
     console.error('Unexpected error in GET /api/agent-tasks:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
