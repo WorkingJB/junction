@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@orqestr/database": "workspace:*",
-    "axios": "^1.7.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {

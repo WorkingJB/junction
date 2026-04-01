@@ -3,7 +3,7 @@
  * Implements OAuth 2.0 authentication and API v2
  */
 
-import type { AxiosInstance } from 'axios';
+import type { HttpClient } from '../../utils/http';
 import { BaseIntegrationAdapter } from '../base';
 import type {
   IntegratedTask,
@@ -415,7 +415,7 @@ export class ClickUpAdapter extends BaseIntegrationAdapter {
 
   // ========== Helper Methods ==========
 
-  private createClient(config: IntegrationConfig): AxiosInstance {
+  private createClient(config: IntegrationConfig): HttpClient {
     return createHttpClient({
       baseUrl: this.baseUrl,
       tokens: config.tokens,

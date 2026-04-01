@@ -71,7 +71,7 @@ March 11, 2026
   - Sensitive data redaction
 
 - **HTTP Client (`src/utils/http.ts`)**
-  - Axios client creation with auth
+  - HTTP client creation with auth (native fetch)
   - Error handling (ApiError, RateLimitError)
   - Retry with exponential backoff
   - Result pagination
