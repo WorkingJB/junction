@@ -2,8 +2,27 @@
  * HTTP client utilities for making API requests to external providers
  */
 
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError } from 'axios';
 import type { OAuthTokens, RateLimitInfo } from '../types/common';
+
+/**
+ * HTTP client interface
+ */
+export interface HttpClient {
+  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
+  post<T>(url: string, data?: unknown, config?: RequestConfig): Promise<HttpResponse<T>>;
+  put<T>(url: string, data?: unknown, config?: RequestConfig): Promise<HttpResponse<T>>;
+  delete<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
+}
+
+interface RequestConfig {
+  params?: Record<string, string | number | boolean>;
+}
+
+interface HttpResponse<T> {
+  data: T;
+  status: number;
+  headers: Record<string, string>;
+}
 
 /**
  * API request error
@@ -43,92 +62,137 @@ export function createHttpClient(params: {
   tokens?: OAuthTokens;
   userAgent?: string;
   timeout?: number;
-}): AxiosInstance {
+}): HttpClient {
   const { baseUrl, tokens, userAgent = 'Orqestr/1.0', timeout = 30000 } = params;
 
-  const client = axios.create({
-    baseURL: baseUrl,
-    timeout,
-    headers: {
-      'User-Agent': userAgent,
-      'Content-Type': 'application/json',
-    },
-  });
+  const defaultHeaders: Record<string, string> = {
+    'User-Agent': userAgent,
+    'Content-Type': 'application/json',
+  };
 
-  // Add authorization header if tokens are provided
   if (tokens?.accessToken) {
-    client.defaults.headers.common['Authorization'] = `Bearer ${tokens.accessToken}`;
+    defaultHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
   }
 
-  // Add request interceptor for logging
-  client.interceptors.request.use(
-    (config) => {
-      console.log(`[HTTP] ${config.method?.toUpperCase()} ${config.url}`);
-      return config;
+  async function request<T>(
+    method: string,
+    url: string,
+    data?: unknown,
+    config?: RequestConfig
+  ): Promise<HttpResponse<T>> {
+    let fullUrl = `${baseUrl}${url}`;
+
+    if (config?.params) {
+      const searchParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(config.params)) {
+        searchParams.set(key, String(value));
+      }
+      fullUrl += `?${searchParams.toString()}`;
+    }
+
+    console.log(`[HTTP] ${method.toUpperCase()} ${url}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(fullUrl, {
+        method,
+        headers: defaultHeaders,
+        body: data != null ? JSON.stringify(data) : undefined,
+        signal: controller.signal,
+      });
+
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      if (!response.ok) {
+        const responseData = await response.text().then((text) => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return text;
+          }
+        });
+
+        handleApiError(response.status, headers, responseData);
+      }
+
+      const responseData = await response.json() as T;
+
+      return {
+        data: responseData,
+        status: response.status,
+        headers,
+      };
+    } catch (error) {
+      if (error instanceof ApiError || error instanceof RateLimitError) {
+        throw error;
+      }
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new ApiError('Request timeout', undefined, 'TIMEOUT');
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error occurred'
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  return {
+    get<T>(url: string, config?: RequestConfig) {
+      return request<T>('GET', url, undefined, config);
     },
-    (error) => {
-      console.error('[HTTP] Request error:', error);
-      return Promise.reject(error);
-    }
-  );
-
-  // Add response interceptor for error handling
-  client.interceptors.response.use(
-    (response) => response,
-    (error: AxiosError) => {
-      return Promise.reject(handleApiError(error));
-    }
-  );
-
-  return client;
+    post<T>(url: string, data?: unknown, config?: RequestConfig) {
+      return request<T>('POST', url, data, config);
+    },
+    put<T>(url: string, data?: unknown, config?: RequestConfig) {
+      return request<T>('PUT', url, data, config);
+    },
+    delete<T>(url: string, config?: RequestConfig) {
+      return request<T>('DELETE', url, undefined, config);
+    },
+  };
 }
 
 /**
  * Handle API errors and convert to ApiError
  */
-function handleApiError(error: AxiosError): ApiError {
-  if (error.response) {
-    const { status, data } = error.response;
+function handleApiError(
+  status: number,
+  headers: Record<string, string>,
+  data: unknown
+): never {
+  // Check for rate limiting
+  if (status === 429) {
+    const resetHeader = headers['x-ratelimit-reset'];
+    const limitHeader = headers['x-ratelimit-limit'];
+    const remainingHeader = headers['x-ratelimit-remaining'];
 
-    // Check for rate limiting
-    if (status === 429) {
-      const resetHeader = error.response.headers['x-ratelimit-reset'];
-      const limitHeader = error.response.headers['x-ratelimit-limit'];
-      const remainingHeader = error.response.headers['x-ratelimit-remaining'];
+    const resetAt = resetHeader
+      ? new Date(parseInt(resetHeader, 10) * 1000)
+      : new Date(Date.now() + 60000);
 
-      const resetAt = resetHeader
-        ? new Date(parseInt(resetHeader, 10) * 1000)
-        : new Date(Date.now() + 60000); // Default to 1 minute
+    const limit = limitHeader ? parseInt(limitHeader, 10) : 0;
+    const remaining = remainingHeader ? parseInt(remainingHeader, 10) : 0;
 
-      const limit = limitHeader ? parseInt(limitHeader, 10) : 0;
-      const remaining = remainingHeader ? parseInt(remainingHeader, 10) : 0;
-
-      return new RateLimitError(
-        'Rate limit exceeded',
-        resetAt,
-        limit,
-        remaining
-      );
-    }
-
-    // Extract error message from response
-    let message = 'API request failed';
-    let code: string | undefined;
-
-    if (typeof data === 'object' && data !== null) {
-      const errorData = data as Record<string, unknown>;
-      message = (errorData.message || errorData.error || message) as string;
-      code = errorData.code as string | undefined;
-    }
-
-    return new ApiError(message, status, code, data);
+    throw new RateLimitError('Rate limit exceeded', resetAt, limit, remaining);
   }
 
-  if (error.request) {
-    return new ApiError('No response received from server', undefined, 'NO_RESPONSE');
+  // Extract error message from response
+  let message = 'API request failed';
+  let code: string | undefined;
+
+  if (typeof data === 'object' && data !== null) {
+    const errorData = data as Record<string, unknown>;
+    message = (errorData.message || errorData.error || message) as string;
+    code = errorData.code as string | undefined;
   }
 
-  return new ApiError(error.message || 'Unknown error occurred');
+  throw new ApiError(message, status, code, data);
 }
 
 /**
